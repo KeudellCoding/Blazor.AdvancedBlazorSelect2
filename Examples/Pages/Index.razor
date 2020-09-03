@@ -1,0 +1,101 @@
+﻿@page "/"
+
+<Select2 TItem="Phone"
+         TSource="DbSet<Phone>"
+         IdSelector="p => p.Id"
+         TextSelector="getPhoneDisplayName"
+         Datasource="__DbContext.Phones"
+         Cache="__MemoryCache"
+         Value="selectedPhonesSingle"
+         GetElementById="getPhoneByIdAsync"
+         FilterFunction="phoneFilterFunctionAsync"
+         OnValueChanged="StateHasChanged"></Select2>
+<span>Selected Phone Single:</span>
+<ul>
+    @foreach (var phone in selectedPhonesSingle) {@*This should only resolve in one phone max.*@
+    <li @key="phone"><a class="badge badge-danger" @onclick="() => removeFromList(phone, selectedPhonesSingle)" style="cursor: pointer;">Delete</a> @getPhoneDisplayName(phone)</li>
+}
+</ul>
+
+<Select2 TItem="Phone"
+         TSource="DbSet<Phone>"
+         IdSelector="p => p.Id"
+         TextSelector="getPhoneDisplayName"
+         Datasource="__DbContext.Phones"
+         Cache="__MemoryCache"
+         Value="selectedPhonesMultiple"
+         Multiselect="true"
+         GetElementById="getPhoneByIdAsync"
+         FilterFunction="phoneFilterFunctionAsync"
+         OnValueChanged="StateHasChanged"
+         class="mt-5"></Select2>
+<span>Selected Phone Multiple:</span>
+<ul>
+    @foreach (var phone in selectedPhonesMultiple) {
+        <li @key="phone"><a class="badge badge-danger" @onclick="() => removeFromList(phone, selectedPhonesMultiple)" style="cursor: pointer;">Delete</a> @getPhoneDisplayName(phone)</li>
+    }
+</ul>
+
+<Select2 TItem="Phone"
+         TSource="DbSet<Phone>"
+         IdSelector="p => p.Id"
+         TextSelector="getPhoneDisplayName"
+         OptionLayout="@(p => (MarkupString)$"<b>{p.Manufacturer}</b> - {p.Name}")"
+         Datasource="__DbContext.Phones"
+         Cache="__MemoryCache"
+         Value="selectedPhonesLayout"
+         Multiselect="true"
+         GetElementById="getPhoneByIdAsync"
+         FilterFunction="phoneFilterFunctionAsync"
+         class="mt-5"></Select2>
+
+
+<Select2 TItem="int"
+         TSource="int[]"
+         IdSelector="i => i.ToString()"
+         TextSelector="i => i.ToString()"
+         Datasource="simpleDatasource"
+         Value="selectedSimpleInt"
+         GetElementById="(items, filter, token) => Task.FromResult(items.SingleOrDefault(i => i.ToString().Equals(filter)))"
+         FilterFunction="(items, filter, token) => Task.FromResult(items.Where(i => i.ToString().StartsWith(filter)).ToList())"
+         class="mt-5"></Select2>
+
+@code{
+    private List<Phone> selectedPhonesSingle = new List<Phone> { };
+    private List<Phone> selectedPhonesMultiple = new List<Phone> { };
+    private List<Phone> selectedPhonesLayout = new List<Phone> { };
+
+    private int[] simpleDatasource = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    private List<int> selectedSimpleInt = new List<int> { };
+
+    private async Task<List<Phone>> phoneFilterFunctionAsync(DbSet<Phone> allItems, string filter, CancellationToken token) {
+        var result = await allItems?.ToDictionaryAsync(p => p, p => {
+            var counter = 0;
+
+            if (p.Name.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
+                counter += 3;
+            if (p.Name.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                counter++;
+
+            if (p.Manufacturer?.Contains(filter, StringComparison.OrdinalIgnoreCase) ?? false)
+                counter++;
+
+            return counter;
+        }, token) ?? new Dictionary<Phone, int> { };
+
+        return result.Where(kvp => !string.IsNullOrEmpty(filter) ? kvp.Value > 0 : true)
+            .OrderByDescending(kvp => kvp.Value)
+            .Select(kvp => kvp.Key)
+            .ToList();
+    }
+
+    private async Task<Phone> getPhoneByIdAsync(DbSet<Phone> allItems, string id, CancellationToken token) {
+        return await allItems.FindAsync(id, token);
+    }
+
+    private string getPhoneDisplayName(Phone phone) => phone != null ? $"{phone.Manufacturer} - {phone.Name}" : null;
+
+    private void removeFromList(Phone phone, List<Phone> phoneList) {
+        phoneList.Remove(phone);
+    }
+}
