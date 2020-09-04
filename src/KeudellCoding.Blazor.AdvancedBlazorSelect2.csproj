@@ -11,7 +11,7 @@
     <RepositoryUrl>https://github.com/KeudellCoding/Blazor.AdvancedBlazorSelect2</RepositoryUrl>
     <RepositoryType>Git Repository</RepositoryType>
     <PackageTags>select2;blazor;component;blazor-component;selector;html-select</PackageTags>
-    <Version>1.2</Version>
+    <Version>1.3</Version>
   </PropertyGroup>
 
 
