@@ -60,10 +60,23 @@
          FilterFunction="(items, filter, token) => Task.FromResult(items.Where(i => i.ToString().StartsWith(filter)).ToList())"
          class="mt-5"></Select2>
 
+<Select2Enum TEnum="Animals"
+             Value="selectedAnimal"
+             Multiselect="false"
+             OnValueChanged="() => { Console.WriteLine(selectedAnimal.FirstOrDefault()); }"
+             class="mt-5"></Select2Enum>
+<Select2Enum TEnum="Animals"
+             Value="selectedAnimals"
+             Multiselect="true"
+             class="mt-5"></Select2Enum>
+
 @code{
     private List<Phone> selectedPhonesSingle = new List<Phone> { };
     private List<Phone> selectedPhonesMultiple = new List<Phone> { };
     private List<Phone> selectedPhonesLayout = new List<Phone> { };
+
+    private List<Animals> selectedAnimal = new List<Animals> { };
+    private List<Animals> selectedAnimals = new List<Animals> { };
 
     private int[] simpleDatasource = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     private List<int> selectedSimpleInt = new List<int> { };

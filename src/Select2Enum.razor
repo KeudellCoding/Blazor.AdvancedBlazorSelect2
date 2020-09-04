@@ -1,0 +1,16 @@
+﻿@namespace KeudellCoding.Blazor.AdvancedBlazorSelect2
+
+@typeparam TEnum
+
+<Select2 TItem="TEnum"
+         TSource="IEnumerable<TEnum>"
+         IdSelector="e => getName(e)"
+         TextSelector="e => getDisplayValue(e)"
+         FilterFunction="FilterFunction"
+         GetElementById="(i, id, c) => Task.FromResult((TEnum)Enum.Parse(typeof(TEnum), id))"
+         Datasource="Enum.GetValues(typeof(TEnum)).Cast<TEnum>()"
+         Value="@Value"
+         OnValueChanged="OnValueChanged"
+         Select2Options="Select2Options"
+         MaxItemsPerPage="MaxItemsPerPage"
+         AdditionalAttributes="AdditionalAttributes"></Select2>
