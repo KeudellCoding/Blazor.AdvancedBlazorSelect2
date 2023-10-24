@@ -1,5 +1,8 @@
 ﻿@page "/"
+@using Examples.Data.Models
+@using Newtonsoft.Json
 
+<h5>Select single from DbSet:</h5>
 <Select2 TItem="Phone"
          TSource="DbSet<Phone>"
          IdSelector="p => p.Id"
@@ -11,12 +14,13 @@
          FilterFunction="phoneFilterFunctionAsync"
          OnValueChanged="StateHasChanged"></Select2>
 <span>Selected Phone Single:</span>
-<ul>
+<ul class="mb-5">
     @foreach (var phone in selectedPhonesSingle) {@*This should only resolve in one phone max.*@
     <li @key="phone"><a class="badge badge-danger" @onclick="() => removeFromList(phone, selectedPhonesSingle)" style="cursor: pointer;">Delete</a> @getPhoneDisplayName(phone)</li>
 }
 </ul>
 
+<h5>Select multiple from DbSet:</h5>
 <Select2 TItem="Phone"
          TSource="DbSet<Phone>"
          IdSelector="p => p.Id"
@@ -27,15 +31,15 @@
          Multiselect="true"
          GetElementById="getPhoneByIdAsync"
          FilterFunction="phoneFilterFunctionAsync"
-         OnValueChanged="StateHasChanged"
-         class="mt-5"></Select2>
+         OnValueChanged="StateHasChanged"></Select2>
 <span>Selected Phone Multiple:</span>
-<ul>
+<ul class="mb-5">
     @foreach (var phone in selectedPhonesMultiple) {
         <li @key="phone"><a class="badge badge-danger" @onclick="() => removeFromList(phone, selectedPhonesMultiple)" style="cursor: pointer;">Delete</a> @getPhoneDisplayName(phone)</li>
     }
 </ul>
 
+<h5>Select multiple from DbSet with custom Option markup:</h5>
 <Select2 TItem="Phone"
          TSource="DbSet<Phone>"
          IdSelector="p => p.Id"
@@ -47,9 +51,9 @@
          Multiselect="true"
          GetElementById="getPhoneByIdAsync"
          FilterFunction="phoneFilterFunctionAsync"
-         class="mt-5"></Select2>
+         class="mb-5"></Select2>
 
-
+<h5>Select from simple data source:</h5>
 <Select2 TItem="int"
          TSource="int[]"
          IdSelector="i => i.ToString()"
@@ -58,17 +62,33 @@
          Value="selectedSimpleInt"
          GetElementById="(items, filter, token) => Task.FromResult(items.SingleOrDefault(i => i.ToString().Equals(filter)))"
          FilterFunction="(items, filter, token) => Task.FromResult(items.Where(i => i.ToString().StartsWith(filter)).ToList())"
-         class="mt-5"></Select2>
+         class="mb-5"></Select2>
 
+<h5>Select enum:</h5>
 <Select2Enum TEnum="Animals"
              Value="selectedAnimal"
              Multiselect="false"
              OnValueChanged="() => { Console.WriteLine(selectedAnimal.FirstOrDefault()); }"
-             class="mt-5"></Select2Enum>
+             class="mb-5"></Select2Enum>
+<h5>Select enum multiple:</h5>
 <Select2Enum TEnum="Animals"
              Value="selectedAnimals"
              Multiselect="true"
-             class="mt-5"></Select2Enum>
+             class="mb-5"></Select2Enum>
+
+<h5>Select multiple with tagging (dynamic option creation):</h5>
+<Select2
+    TItem="PizzaTopping"
+    TSource="List<PizzaTopping>"
+    IdSelector="x => x.Id.ToString()"
+    TextSelector="x => x.Name.ToString()"
+    Datasource="_pizzaToppings"
+    Value="_selectedPizzaToppings"
+    Select2Options="_pizzaToppingOptions"
+    GetElementById="(items, filter, token) => Task.FromResult(items.SingleOrDefault(i => i.Id.ToString().Equals(filter)) ?? new PizzaTopping{Id = null, Name = filter})"
+    FilterFunction="(items, filter, token) => Task.FromResult(items.Where(i => i.Name.ToString().StartsWith(filter, StringComparison.InvariantCultureIgnoreCase)).ToList())"
+    class="mb-5"
+></Select2>
 
 @code{
     private List<Phone> selectedPhonesSingle = new List<Phone> { };
@@ -77,6 +97,22 @@
 
     private List<Animals> selectedAnimal = new List<Animals> { };
     private List<Animals> selectedAnimals = new List<Animals> { };
+
+    private List<PizzaTopping> _pizzaToppings { get; set; } = 
+        new List<PizzaTopping>
+        {
+            new PizzaTopping { Id = 0, Name = "Pepperoni" }, 
+            new PizzaTopping { Id = 1, Name = "Pineapple" }, 
+            new PizzaTopping { Id = 2, Name = "Canadian Bacon" }
+        };
+
+    private List<PizzaTopping> _selectedPizzaToppings { get; set; } = new List<PizzaTopping>();
+
+    private InputSelect2Options _pizzaToppingOptions { get; set; } = new InputSelect2Options
+    {
+        Tags = true,
+        Multiple = true
+    };
 
     private int[] simpleDatasource = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     private List<int> selectedSimpleInt = new List<int> { };
