@@ -72,5 +72,7 @@ namespace KeudellCoding.Blazor.AdvancedBlazorSelect2 {
         public bool ScrollAfterSelect { get; set; } = false;
         [JsonProperty("noMarkupEscape")]
         public bool NoMarkupEscape { get; set; } = true;
+        [JsonProperty("tags")] 
+        public bool Tags { get; set; } = false;
     }
 }
